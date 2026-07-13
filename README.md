@@ -87,3 +87,39 @@ The project is built on a 3-node distributed architecture communicating over an 
 * Database: InfluxDB
 * Dashboard: Grafana
 * ML Pipeline: Python
+
+```mermaid
+flowchart TD
+    subgraph Battery Level
+        Pack[16S Battery Pack & Thermistors]
+    end
+
+    subgraph Distributed BMS Nodes
+        Node1[Node 1: Master BMU<br>STM32 + BQ76952 AFE]
+        Node2[Node 2: Aux Controller<br>STM32]
+        Node3[Node 3: IoT Gateway<br>ESP32]
+        CAN{Isolated CAN 2.0B Bus}
+    end
+
+    subgraph Power & Actuation
+        Relays[Charge/Discharge Contactors<br>& Thermal Management]
+    end
+
+    subgraph Cloud & AI Backend
+        MQTT[MQTT Broker]
+        DB[(InfluxDB)]
+        ML[Python AI SOH Model]
+        Dash[Grafana Dashboard]
+    end
+
+    Pack <-->|Analog| Node1
+    Node1 <-->|Telemetry & Commands| CAN
+    CAN <--> Node2
+    CAN <--> Node3
+    
+    Node2 -->|Physical Control| Relays
+    Node3 -->|Wi-Fi / JSON| MQTT
+    
+    MQTT --> DB
+    DB <--> ML
+    DB --> Dash
