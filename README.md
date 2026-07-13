@@ -1,73 +1,89 @@
-# AI-Enhanced Distributed Battery Management System (BMS)
+# Distributed AI-Enhanced 16S Battery Management System
 
-![C](https://img.shields.io/badge/C-00599C?style=for-the-badge&logo=c&logoColor=white)
-![STM32](https://img.shields.io/badge/STM32-03234B?style=for-the-badge&logo=stmicroelectronics&logoColor=white)
-![ESP32](https://img.shields.io/badge/ESP32-E7352C?style=for-the-badge&logo=espressif&logoColor=white)
-![MQTT](https://img.shields.io/badge/MQTT-660066?style=for-the-badge&logo=mqtt&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+## Project Overview
+This repository contains the firmware, network architecture, and cloud telemetry pipeline for a distributed 16S Battery Management System. Designed strictly around **Embedded Computer Networks and Software-Hardware Co-development**, this project solves complex battery management challenges using distributed computing nodes, isolated communication buses and software-controlled logic rather than pure analog circuitry.
 
-## 📌 Project Overview
-The increasing demand for reliable energy storage in Electric Vehicles (EVs) and microgrids requires highly robust, fault-tolerant monitoring systems. Traditional centralized Battery Management Systems (BMS) suffer from single points of failure, severe EMI noise susceptibility, and a lack of predictive diagnostics. 
-
-This project implements a **Distributed Intelligent BMS** using a 3-node embedded architecture communicating over a deterministic **CAN 2.0B network**. It integrates an IoT gateway (ESP32) to stream real-time battery telemetry via MQTT to a cloud backend, where an edge-to-cloud Machine Learning pipeline predicts the battery's State of Health (SOH) and detects early degradation anomalies.
+The system is designed to scale from standard 18650 cell packs up to pouch cells (Nissan Leaf modules) and prismatic cells, leveraging a Master-Satellite topology to separate sensing, actuation, and cloud telemetry.
 
 ---
 
-## 🏗️ System Architecture (3-Node Distributed Topology)
+## Core Functionalities
 
-1. **Node 1: Master Battery Monitoring Unit (BMU)**
-   * **Hardware:** STM32F103 / STM32G4
-   * **Role:** Interfaces with cell voltage/temperature sensors via SPI/I2C. Executes safety-critical fault logic (Over-Voltage, Under-Voltage, Over-Current) and broadcasts telemetry to the CAN bus.
-2. **Node 2: Auxiliary Controller**
-   * **Hardware:** STM32F103
-   * **Role:** Listens to CAN bus traffic to manage peripheral actuators, including PWM-based thermal management (cooling fans) and charging/discharging contactor relays.
-3. **Node 3: IoT & AI Gateway**
-   * **Hardware:** ESP32
-   * **Role:** Bridges the local CAN network to the cloud. Sniffs CAN frames, parses payload data, and publishes JSON payloads via MQTT over Wi-Fi. 
+1. **Distributed Data Acquisition:** The system reads 16 individual cell voltages, pack current and temperatures at the battery edge and transmits this data across a secure, priority-mapped network.
+2. **Software-Controlled Passive Balancing:** Cell voltage deltas are calculated by the Master BMU, which dynamically commands the analog front-end to trigger external P-Channel MOSFETs and bleed resistors on a per-cell basis.
+3. **Fail-Safe Power Distribution:** An independent Auxiliary node physically controls main charge/discharge contactors and thermal management systems based on network commands, providing physical isolation from the measurement logic.
+4. **Edge-to-Cloud Telemetry Pipeline:** A dedicated IoT gateway sniffs local bus traffic, serializes the embedded data into JSON payloads, and pushes it to a cloud database via MQTT/Wi-Fi.
+5. **AI-Driven State of Health (SOH) Monitoring:** Cloud-hosted Python backend scripts apply a Scikit-Learn machine learning model (trained on NASA Battery Datasets) to historical telemetry to predict battery degradation, visualized on a live Grafana dashboard.
 
 ---
 
-## ⚙️ Core Functionalities
+## System Requirements
 
-* **Distributed Networking:** Real-time, noise-immune communication between independent Microcontroller Units (MCUs) using CAN bus.
-* **Precise Cell Monitoring:** Continuous acquisition of individual cell voltages, pack current, and thermal gradients.
-* **Intelligent Thermal Management:** Dynamic PWM cooling control based on real-time temperature data broadcasted over the network.
-* **Hardware-Level Protection:** Immediate physical isolation of the battery pack via relays upon detecting critical thresholds (OVP, UVP, OCP, OTP).
-* **Cloud Telemetry:** Live streaming of battery metrics to a Grafana digital twin dashboard via an MQTT broker.
-* **AI-Driven SOH Prediction:** Backend processing of historical time-series data using Machine Learning (Linear Regression/Random Forest) to estimate battery degradation and State of Health (SOH).
+### Functional Requirements
+* **FR1 - Cell Measurement:** Node 1 must measure up to 16 series cell voltages, aggregate pack current via a shunt, and read thermistor data using the TI BQ76952 AFE.
+* **FR2 - Balancing Actuation:** Node 1 must calculate cell voltage imbalances and transmit I2C commands to the AFE to toggle external passive balancing circuits.
+* **FR3 - Network Communication:** All nodes must communicate over a CAN 2.0B bus using standard 11-bit identifiers with predefined priority mapping.
+* **FR4 - Contactor Control:** Node 2 must parse incoming CAN messages to control standard charge/discharge relays and precharge sequences.
+* **FR5 - Telemetry Forwarding:** Node 3 must operate in CAN promiscuous mode to capture all bus traffic, format it into JSON, and transmit it to an external MQTT broker.
+
+### Non-Functional Requirements
+* **NFR1 - Galvanic Isolation:** The CAN bus must utilize isolated CAN transceivers to protect the microcontrollers from the 60V battery ground.
+* **NFR2 - Microsecond Fault Response:** Node 1 must utilize hardware-level external interrupts tied to the AFE's ALERT pin to trigger immediate safety routines during short-circuit events.
+* **NFR3 - Network Safety:** Node 2 must implement a software watchdog/heartbeat monitor. If network communication from Node 1 is lost, Node 2 must default to a safe state (drop all contactors) to prevent thermal runaway.
+* **NFR4 - Scalability:** The network architecture must allow the addition of a second Master BMU (scaling to 32S) without requiring changes to the IoT Gateway or Aux Controller firmware.
 
 ---
 
-## 📋 Requirements Specification
+## System Architecture
 
-### Functional Requirements (FR)
-* **FR-1:** The Master BMU shall measure individual cell voltages with an accuracy of ±10mV and broadcast this data over the CAN bus every 100ms.
-* **FR-2:** The Auxiliary Controller shall activate the cooling fan via PWM when the broadcasted pack temperature exceeds 35°C, scaling fan speed proportionally up to 45°C.
-* **FR-3:** The protection logic shall open the main contactor relay within 50ms of receiving a critical fault CAN frame.
-* **FR-4:** The IoT Gateway shall translate standard CAN 2.0B frames into MQTT JSON payloads and publish them to the cloud broker at a frequency of 1Hz.
-* **FR-5:** The backend ML pipeline shall calculate an updated State of Health (SOH) percentage at the end of every complete charge/discharge cycle.
+The project is built on a 3-node distributed architecture communicating over an **Isolated CAN 2.0B bus**:
 
-### Non-Functional Requirements (NFR)
-* **NFR-1 (Reliability):** The local control network must use differential signaling (CAN bus) to reject electromagnetic interference from high-current switching.
-* **NFR-2 (Scalability):** The software architecture shall allow new auxiliary nodes to be added to the CAN bus without requiring modification to the Master BMU's firmware.
-* **NFR-3 (Fault Tolerance):** If the IoT Gateway loses Wi-Fi connection, the local CAN network and Master/Aux protection nodes must continue to operate independently and safely.
-* **NFR-4 (Real-Time Constraint):** The RTOS task managing CAN transmission on the Master BMU must not block or be preempted by non-critical tasks (e.g., debug printing) for more than 5ms.
+* **Node 1: Master BMU (Sensing & Balancing)**
+    * **Hardware:** STM32 + TI BQ76952 AFE.
+    * **Function:** Sits directly on the battery pack. Executes software-controlled balancing and triggers hardware interrupts for short-circuit protection.
+* **Node 2: Aux Controller (Power Distribution)**
+    * **Hardware:** STM32.
+    * **Function:** Listens to CAN traffic via Hardware Acceptance Filtering. Controls charge/discharge contactors and thermal management. 
+* **Node 3: IoT Gateway (Telemetry & Edge-to-Cloud)**
+    * **Hardware:** ESP32.
+    * **Function:** Sniffs bus traffic, serializes telemetry into JSON, and publishes to an MQTT broker over Wi-Fi.
+
+---
+
+## Weekly Development Timeline
+
+| Week | Phase | Tasks & Deliverables | Syllabus Mapping | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Week 1** | **Formulation** | Finalize distributed architecture, evaluate component feasibility (STM32/ESP32/BQ76952), and define network topology. | 1. Project Formulation | ✅ Completed |
+| **Week 2** | **Planning** | Repo initialization, Requirement Engineering documentation (FRs & NFRs), and drafting the software-hardware co-development plan. | 2. Project Plans <br> 3. Requirement Eng. | 🔄 In Progress |
+| **Week 3** | **Modeling** | Model the CAN bus matrix (11-bit IDs, priority mapping) and define the JSON data payloads for telemetry. | 4. High-level Simulation | ⏳ Pending |
+| **Week 4** | **Firmware (Node 1)** | Develop STM32 I2C drivers for BQ76952; implement cell reading and external balancing logic. | 5. Architecture Ext. | ⏳ Pending |
+| **Week 5** | **Networking** | Implement Isolated CAN 2.0B stack; establish core communication between Node 1 and Node 2. | 6. Prototype Dev. | ⏳ Pending |
+| **Week 6** | **Firmware (Node 2)** | Develop Aux Controller CAN acceptance filtering, contactor logic, and heartbeat safety sequence. | 6. Prototype Dev. | ⏳ Pending |
+| **Week 7** | **Firmware (Node 3)** | Configure ESP32 CAN promiscuous mode and setup Wi-Fi/Network stack. | 6. Prototype Dev. | ⏳ Pending |
+| **Week 8** | **IoT Integration** | Implement JSON serialization on ESP32 and establish MQTT publishing to the backend. | 6. Prototype Dev. | ⏳ Pending |
+| **Week 9** | **Cloud Backend** | Setup InfluxDB backend and Python MQTT subscriber script to log time-series data. | 6. Prototype Dev. | ⏳ Pending |
+| **Week 10** | **AI Integration** | Integrate Scikit-Learn SOH prediction model into the Python backend pipeline. | 6. Prototype Dev. | ⏳ Pending |
+| **Week 11** | **Visualization** | Connect InfluxDB to Grafana; build live dashboards for cell telemetry and AI predictions. | 6. Prototype Dev. | ⏳ Pending |
+| **Week 12** | **Testing** | Execute subsystem and integrated testing (Fault injection, CAN bus load testing, heartbeat failure). | 7. Integrated Testing | ⏳ Pending |
+| **Week 13** | **Deployment** | Code freeze, prepare production deployment environments, and finalize system configurations. | 8. Prod Environments | ⏳ Pending |
+| **Week 14** | **Release** | Finalize all project documentation, produce required artifacts, and present the system. | 9. Artefacts <br> 10. Presentation | ⏳ Pending |* **NFR-4 (Real-Time Constraint):** The RTOS task managing CAN transmission on the Master BMU must not block or be preempted by non-critical tasks (e.g., debug printing) for more than 5ms.
 
 ---
 
 ## 🛠️ Technology Stack
 
 **Embedded Hardware:**
-* Microcontrollers: STM32 (ARM Cortex-M), ESP32 (Xtensa Dual-Core)
-* Networking: MCP2515 CAN Controllers / TJA1050 CAN Transceivers
+* Microcontrollers: STM32, ESP32
+* Networking: CAN Transceivers
 * PCB Design: EasyEDA
 
 **Embedded Software:**
 * Firmware: C/C++, FreeRTOS, STM32 HAL
-* Protocols: CAN 2.0B, SPI, I2C, UART, MQTT
+* Protocols: CAN 2.0B, I2C, UART, MQTT
 
 **Cloud & AI Backend:**
 * Broker: Eclipse Mosquitto (MQTT)
-* Database: InfluxDB (Time-series data)
+* Database: InfluxDB
 * Dashboard: Grafana
-* ML Pipeline: Python (Scikit-Learn, Pandas)
+* ML Pipeline: Python
