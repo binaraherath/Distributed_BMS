@@ -54,9 +54,9 @@ The project is built on a 3-node distributed architecture communicating over an 
 
 | Week | Phase | Tasks & Deliverables | Syllabus Mapping | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Week 1** | **Formulation** | Finalize distributed architecture, evaluate component feasibility (STM32/ESP32/BQ76952), and define network topology. | 1. Project Formulation | ✅ Completed |
-| **Week 2** | **Planning** | Repo initialization, Requirement Engineering documentation (FRs & NFRs), and drafting the software-hardware co-development plan. | 2. Project Plans <br> 3. Requirement Eng. | ✅ Completed |
-| **Week 3** | **Modeling** | Model the CAN bus matrix (11-bit IDs, priority mapping) and define the JSON data payloads for telemetry. | 4. High-level Simulation | ⏳ Pending |
+| **Week 1** | **Formulation** | Finalize distributed architecture, evaluate component feasibility (STM32/ESP32/BQ76952) and define network topology. | 1. Project Formulation | ✅ Completed |
+| **Week 2** | **Planning** | Repo initialization, Requirement Engineering documentation and drafting the software-hardware co-development plan. | 2. Project Plans <br> 3. Requirement Eng. | ✅ Completed |
+| **Week 3** | **Modeling** | Model the CAN bus matrix and define the JSON data payloads for telemetry. | 4. High-level Simulation | ⏳ Pending |
 | **Week 4** | **Firmware (Node 1)** | Develop STM32 I2C drivers for BQ76952; implement cell reading and external balancing logic. | 5. Architecture Ext. | ⏳ Pending |
 | **Week 5** | **Networking** | Implement Isolated CAN 2.0B stack; establish core communication between Node 1 and Node 2. | 6. Prototype Dev. | ⏳ Pending |
 | **Week 6** | **Firmware (Node 2)** | Develop Aux Controller CAN acceptance filtering, contactor logic, and heartbeat safety sequence. | 6. Prototype Dev. | ⏳ Pending |
