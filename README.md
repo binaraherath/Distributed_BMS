@@ -49,7 +49,8 @@ The project is built on a 3-node distributed architecture communicating over an 
     * **Function:** Sniffs bus traffic, serializes telemetry into JSON, and publishes to an MQTT broker over Wi-Fi.
 
 ---
-
+![Description of the first image](images/BQ.png)
+![Description of the first image](images/node1.png)
 ## Weekly Development Timeline
 
 | Week | Phase | Tasks & Deliverables | Syllabus Mapping | Status |
