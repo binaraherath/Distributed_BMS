@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Flash & Debug STM32",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/Debug/BMS_Node1.elf",
+            "device": "STM32F103xB",
+            "configFiles": [
+                "interface/stlink.cfg",
+                "clone.cfg",
+                "target/stm32f1x.cfg"
+            ]
+        }
+    ]
+}
