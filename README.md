@@ -55,20 +55,20 @@ The project is built on a 3-node distributed architecture communicating over an 
 
 | Week | Phase | Tasks & Deliverables | Syllabus Mapping | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Week 1** | **Formulation** | Finalize distributed architecture, evaluate component feasibility (STM32/ESP32/BQ76952) and define network topology. | 1. Project Formulation | ✅ Completed |
-| **Week 2** | **Planning** | Repo initialization, Requirement Engineering documentation and drafting the software-hardware co-development plan. | 2. Project Plans <br> 3. Requirement Eng. | ✅ Completed |
-| **Week 3** | **Modeling** | Model the CAN bus matrix and define the JSON data payloads for telemetry. | 4. High-level Simulation | ⏳ Pending |
-| **Week 4** | **Firmware (Node 1)** | Develop STM32 I2C drivers for BQ76952; implement cell reading and external balancing logic. | 5. Architecture Ext. | ⏳ Pending |
-| **Week 5** | **Networking** | Implement Isolated CAN 2.0B stack; establish core communication between Node 1 and Node 2. | 6. Prototype Dev. | ⏳ Pending |
-| **Week 6** | **Firmware (Node 2)** | Develop Aux Controller CAN acceptance filtering, contactor logic, and heartbeat safety sequence. | 6. Prototype Dev. | ⏳ Pending |
-| **Week 7** | **Firmware (Node 3)** | Configure ESP32 CAN promiscuous mode and setup Wi-Fi/Network stack. | 6. Prototype Dev. | ⏳ Pending |
-| **Week 8** | **IoT Integration** | Implement JSON serialization on ESP32 and establish MQTT publishing to the backend. | 6. Prototype Dev. | ⏳ Pending |
-| **Week 9** | **Cloud Backend** | Setup InfluxDB backend and Python MQTT subscriber script to log time-series data. | 6. Prototype Dev. | ⏳ Pending |
-| **Week 10** | **AI Integration** | Integrate Scikit-Learn SOH prediction model into the Python backend pipeline. | 6. Prototype Dev. | ⏳ Pending |
-| **Week 11** | **Visualization** | Connect InfluxDB to Grafana; build live dashboards for cell telemetry and AI predictions. | 6. Prototype Dev. | ⏳ Pending |
-| **Week 12** | **Testing** | Execute subsystem and integrated testing (Fault injection, CAN bus load testing, heartbeat failure). | 7. Integrated Testing | ⏳ Pending |
-| **Week 13** | **Deployment** | Code freeze, prepare production deployment environments, and finalize system configurations. | 8. Prod Environments | ⏳ Pending |
-| **Week 14** | **Release** | Finalize all project documentation, produce required artifacts, and present the system. | 9. Artefacts <br> 10. Presentation | ⏳ Pending |* **NFR-4 (Real-Time Constraint):** The RTOS task managing CAN transmission on the Master BMU must not block or be preempted by non-critical tasks (e.g., debug printing) for more than 5ms.
+| **Week 1** | **System Formulation** | Finalize the 16S distributed BMS architecture, define the three-node architecture, evaluate STM32/ESP32/BQ76952, and define the isolated CAN network topology. | 1. Project Formulation | ✅ Completed |
+| **Week 2** | **Requirements & Planning** | Define functional and non-functional requirements, communication requirements, fault-handling strategy, hardware/software interfaces, and development plan. Initialize project repository and documentation. | 2. Project Plans <br> 3. Requirement Engineering | ✅ Completed |
+| **Week 3** | **System Architecture & Firmware** | Define CAN message structure, node responsibilities and data flow. Develop the initial STM32 firmware architecture and BMS data-handling framework. | 4. High-level Simulation <br> 5. Architecture Extension | ✅ Completed |
+| **Week 4** | **Node 1 Firmware & BMS Interface** | Develop STM32–BQ76952 I²C communication, cell-monitoring firmware, temperature/current data acquisition, and external passive balancing control. | 5. Architecture Extension <br> 6. Prototype Development | ✅ Completed |
+| **Week 5** | **CAN Communication Prototype** | Develop and test CAN communication between STM32 and ESP32. Design and assemble custom ISO1042-based CAN transceiver modules with termination. Implement CAN data transmission and reception. | 6. Prototype Development | ✅ Completed |
+| **Week 6** | **IoT Gateway & Hardware Prototype** | Develop ESP32 CAN gateway firmware and basic Wi-Fi monitoring interface. Assemble the breadboard testing setup using STM32 Blue Pill, ESP32, BQ76952 SMD-to-DIP adapter, and custom CAN modules. Complete the Node 1 schematic. | 6. Prototype Development | ✅ Completed |
+| **Week 7** | **Battery Pack & Full Hardware Prototype** | Prepare the 16S Nissan Leaf battery pack and complete the full BMS testing circuit on dot board. Integrate cell-voltage, current and temperature sensing, balancing, and CAN communication with the battery pack. | 6. Prototype Development | 🔄 In Progress |
+| **Week 8** | **Node 1 PCB Development** | Complete PCB routing and design verification for Node 1. Review power, sensing, I²C, CAN isolation, balancing, and connector interfaces. Prepare PCB for fabrication. | 6. Prototype Development | ⏳ Planned |
+| **Week 9** | **Backend & Data Infrastructure** | Develop the backend communication layer. Implement MQTT communication, telemetry processing, and database integration for cell-level and pack-level measurements. | 6. Prototype Development | ⏳ Planned |
+| **Week 10** | **Dashboard & Visualization** | Develop the user interface for real-time monitoring. Display individual cell voltages, pack voltage, current, temperatures, balancing status, SOC, and fault information. | 6. Prototype Development | ⏳ Planned |
+| **Week 11** | **Node 2 System Control** | Integrate and test the second STM32 node for precharge control, charge/discharge contactors, PWM cooling fan, and system-level fault response. Implement heartbeat/watchdog-based communication monitoring. | 6. Prototype Development | ⏳ Planned |
+| **Week 12** | **Custom PCB & System Integration** | Assemble and test the custom Node 1 PCB. Integrate Node 1, Node 2, and ESP32 gateway through the isolated CAN network. Finalize firmware and communication protocols. | 7. Integrated Testing | ⏳ Planned |
+| **Week 13** | **System Validation & Performance Testing** | Perform integrated testing with the battery pack. Evaluate cell-voltage measurement accuracy, temperature/current sensing, CAN communication, balancing, fault handling, contactor/precharge operation, and communication failure response. | 7. Integrated Testing <br> 8. Production Environment | ⏳ Planned |
+| **Week 14** | **Finalization & Demonstration** | Complete enclosure and physical integration, finalize dashboard, documentation, and test results. Conduct final system demonstration and prepare the project presentation and required artefacts. | 9. Artefacts <br> 10. Presentation | ⏳ Planned |
 
 ---
 
