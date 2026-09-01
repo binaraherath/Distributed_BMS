@@ -50,6 +50,7 @@ The project is built on a 3-node distributed architecture communicating over an 
 
 ---
 ![Description of the first image](images/BQ.png)
+![Description of the first image](images/prototype.jpeg)
 ![Description of the first image](images/node1.png)
 ## Weekly Development Timeline
 
