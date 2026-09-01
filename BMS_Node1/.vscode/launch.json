@@ -1,15 +1,14 @@
 {
     "version": "0.2.0",
     "configurations": [
-
         {
-            "name": "Flash & Debug STM32",
+            "name": "Flash STM32 via OpenOCD",
             "type": "cortex-debug",
             "request": "launch",
             "servertype": "openocd",
             "cwd": "${workspaceFolder}",
             "executable": "${workspaceFolder}/build/Debug/BMS_Node1.elf",
-            "device": "STM32F103xB",
+            "runToEntryPoint": "main",
             "configFiles": [
                 "interface/stlink.cfg",
                 "clone.cfg",
