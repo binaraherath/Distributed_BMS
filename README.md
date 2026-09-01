@@ -1,4 +1,4 @@
-# Distributed AI-Enhanced 16S Battery Management System
+# Distributed 16S Battery Management System
 
 ## Project Overview
 This repository contains the firmware, network architecture, and cloud telemetry pipeline for a distributed 16S Battery Management System. Designed strictly around **Embedded Computer Networks and Software-Hardware Co-development**, this project solves complex battery management challenges using distributed computing nodes, isolated communication buses and software-controlled logic rather than pure analog circuitry.
@@ -10,7 +10,7 @@ The system is designed to scale from standard 18650 cell packs up to pouch cells
 ## Core Functionalities
 
 1. **Distributed Data Acquisition:** The system reads 16 individual cell voltages, pack current and temperatures at the battery edge and transmits this data across a secure, priority-mapped network.
-2. **Software-Controlled Passive Balancing:** Cell voltage deltas are calculated by the Master BMU, which dynamically commands the analog front-end to trigger external P-Channel MOSFETs and bleed resistors on a per-cell basis.
+2. **Software-Controlled Passive Balancing:** Cell voltage deltas are calculated by the Master BMU, which dynamically commands the analog front-end to trigger external MOSFETs and bleed resistors on a per-cell basis.
 3. **Fail-Safe Power Distribution:** An independent Auxiliary node physically controls main charge/discharge contactors and thermal management systems based on network commands, providing physical isolation from the measurement logic.
 4. **Edge-to-Cloud Telemetry Pipeline:** A dedicated IoT gateway sniffs local bus traffic, serializes the embedded data into JSON payloads, and pushes it to a cloud database via MQTT/Wi-Fi.
 5. **AI-Driven State of Health (SOH) Monitoring:** Cloud-hosted Python backend scripts apply a Scikit-Learn machine learning model (trained on NASA Battery Datasets) to historical telemetry to predict battery degradation, visualized on a live Grafana dashboard.
@@ -81,7 +81,7 @@ The project is built on a 3-node distributed architecture communicating over an 
 * PCB Design: EasyEDA
 
 **Embedded Software:**
-* Firmware: C/C++, FreeRTOS, STM32 HAL
+* Firmware: C/C++, STM32 HAL
 * Protocols: CAN 2.0B, I2C, UART, MQTT
 
 **Cloud & AI Backend:**
