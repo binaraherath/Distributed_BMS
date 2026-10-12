@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+    <marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1d4ed8"/>
+    </marker>
+    <marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c2410c"/>
+    </marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#047857"/>
+    </marker>
+    <style>
+      .h  { font-size: 16px; font-weight: 700; fill: #111827; }
+      .h2 { font-size: 13.5px; font-weight: 700; fill: #111827; }
+      .s  { font-size: 12px; fill: #374151; }
+      .xs { font-size: 11px; fill: #4b5563; }
+      .w  { font-size: 11px; fill: #1f2937; font-weight: 600; }
+      .blk { fill: #ffffff; stroke-width: 1.2; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="800" fill="#ffffff"/>
+
+  <!-- ============ title ============ -->
+  <text x="24" y="28" class="h2" fill="#6b7280">Distributed 16S BMS · system architecture</text>
+
+  <!-- ============ Battery pack ============ -->
+  <rect x="24" y="44" width="250" height="300" rx="12" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.5"/>
+  <text x="40" y="72" class="h">16S Battery Pack</text>
+  <text x="40" y="92" class="s">8 × Nissan Leaf modules (2S2P)</text>
+  <text x="40" y="108" class="s">≈ 60 V nominal · SOH ≈ 35 %</text>
+  <rect x="40" y="124" width="218" height="40" rx="7" class="blk" stroke="#9ca3af"/>
+  <text x="52" y="141" class="w">Cell sense taps × 17</text>
+  <text x="52" y="156" class="xs">4 × JST-XH, cells 1–16</text>
+  <rect x="40" y="172" width="218" height="40" rx="7" class="blk" stroke="#9ca3af"/>
+  <text x="52" y="189" class="w">10 kΩ NTC × 4</text>
+  <text x="52" y="204" class="xs">NTC to VSS, TEMP header</text>
+  <rect x="40" y="220" width="218" height="40" rx="7" class="blk" stroke="#9ca3af"/>
+  <text x="52" y="237" class="w">Shunt 100 A / 75 mV</text>
+  <text x="52" y="252" class="xs">0.75 mΩ in pack negative</text>
+  <rect x="40" y="268" width="218" height="60" rx="7" class="blk" stroke="#9ca3af"/>
+  <text x="52" y="285" class="w">External bleeder board</text>
+  <text x="52" y="300" class="xs">16 × 18 Ω 5 W ceramic</text>
+  <text x="52" y="315" class="xs">≈ 0.2 A per cell</text>
+
+  <!-- ============ Node 1 ============ -->
+  <rect x="330" y="44" width="560" height="300" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/>
+  <text x="346" y="72" class="h">Node 1 · Master Monitoring Unit</text>
+  <text x="346" y="90" class="xs">custom 4-layer PCB (EasyEDA → JLCPCB) · STM32 powered from the CAN harness</text>
+
+  <rect x="346" y="104" width="230" height="104" rx="8" class="blk" stroke="#93c5fd"/>
+  <text x="358" y="124" class="h2">TI BQ76952 AFE</text>
+  <text x="358" y="143" class="s">16 cell voltages · stack</text>
+  <text x="358" y="159" class="s">coulomb counter (SRP/SRN)</text>
+  <text x="358" y="175" class="s">TS1 · TS3 · DCHG · DDSG → NTC</text>
+  <text x="358" y="191" class="s">HW protection · balance switches</text>
+
+  <rect x="652" y="104" width="222" height="104" rx="8" class="blk" stroke="#93c5fd"/>
+  <text x="664" y="124" class="h2">STM32F103C8T6</text>
+  <text x="664" y="143" class="s">2-layer protection · SoC / SoH</text>
+  <text x="664" y="159" class="s">odd/even balancing policy</text>
+  <text x="664" y="175" class="s">current limits · state machine</text>
+  <text x="664" y="191" class="s">E2E-protected CAN telemetry</text>
+
+  <line x1="578" y1="140" x2="648" y2="140" stroke="#1d4ed8" stroke-width="1.6" marker-start="url(#ab)" marker-end="url(#ab)"/>
+  <text x="586" y="133" class="xs">I²C</text>
+  <line x1="578" y1="166" x2="648" y2="166" stroke="#1d4ed8" stroke-width="1.6" marker-end="url(#ab)"/>
+  <text x="583" y="160" class="xs">ALERT</text>
+  <line x1="648" y1="190" x2="578" y2="190" stroke="#1d4ed8" stroke-width="1.6" marker-end="url(#ab)"/>
+  <text x="580" y="203" class="xs">RST_SHUT</text>
+
+  <rect x="346" y="222" width="230" height="56" rx="8" class="blk" stroke="#93c5fd"/>
+  <text x="358" y="242" class="h2">NPN balancing × 16</text>
+  <text x="358" y="260" class="s">MMBT2222A drivers, odd / even</text>
+
+  <rect x="652" y="222" width="106" height="56" rx="8" class="blk" stroke="#93c5fd"/>
+  <text x="662" y="242" class="h2">OLED</text>
+  <text x="662" y="260" class="xs">0.96" SSD1306</text>
+  <rect x="768" y="222" width="106" height="56" rx="8" class="blk" stroke="#93c5fd"/>
+  <text x="778" y="242" class="h2">USART</text>
+  <text x="778" y="260" class="xs">debug CLI 115200</text>
+
+  <rect x="652" y="292" width="222" height="40" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="1.2"/>
+  <text x="664" y="309" class="h2">ISO1042 + B0505S</text>
+  <text x="664" y="324" class="xs">isolated CAN + 5 V · ESD · split term.</text>
+
+  <!-- pack → node 1 -->
+  <line x1="258" y1="144" x2="342" y2="144" stroke="#374151" stroke-width="1.6" marker-end="url(#a)"/>
+  <line x1="258" y1="192" x2="342" y2="176" stroke="#374151" stroke-width="1.6" marker-end="url(#a)"/>
+  <line x1="258" y1="240" x2="342" y2="196" stroke="#374151" stroke-width="1.6" marker-end="url(#a)"/>
+  <line x1="342" y1="258" x2="258" y2="292" stroke="#374151" stroke-width="1.6" marker-end="url(#a)"/>
+  <text x="280" y="317" class="xs">bleed</text>
+  <line x1="461" y1="210" x2="461" y2="220" stroke="#1d4ed8" stroke-width="1.6" marker-end="url(#ab)"/>
+  <line x1="763" y1="210" x2="763" y2="220" stroke="#1d4ed8" stroke-width="1.6" marker-end="url(#ab)"/>
+
+  <!-- ============ Isolation barrier ============ -->
+  <text x="24" y="358" class="xs" font-weight="700" letter-spacing="1.2">▲ PACK SIDE · referenced to pack negative</text>
+  <line x1="24" y1="368" x2="1256" y2="368" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="9 6"/>
+  <rect x="300" y="358" width="298" height="20" fill="#ffffff"/>
+  <text x="308" y="373" class="xs" fill="#b91c1c" font-weight="700">galvanic isolation · ISO1042 (5 kVrms) · B0505S DC-DC</text>
+  <text x="24" y="390" class="xs" font-weight="700" letter-spacing="1.2">▼ SYSTEM SIDE · low voltage, isolated</text>
+
+  <!-- ============ CAN bus ============ -->
+  <line x1="70" y1="410" x2="1220" y2="410" stroke="#111827" stroke-width="3"/>
+  <line x1="70" y1="420" x2="1220" y2="420" stroke="#111827" stroke-width="3"/>
+  <rect x="46" y="402" width="22" height="26" rx="3" fill="#ffffff" stroke="#111827" stroke-width="1.4"/>
+  <text x="30" y="444" class="xs">120 Ω (split, Node 1)</text>
+  <rect x="1222" y="402" width="22" height="26" rx="3" fill="#ffffff" stroke="#111827" stroke-width="1.4"/>
+  <text x="1188" y="444" class="xs">120 Ω end</text>
+  <text x="830" y="400" class="w">Isolated CAN 2.0A · 500 kbit/s · ≈ 3 % bus load</text>
+  <text x="830" y="438" class="xs">4-wire harness: 5 V · CAN_H · CAN_L · GND</text>
+  <line x1="700" y1="334" x2="700" y2="406" stroke="#1d4ed8" stroke-width="2" marker-end="url(#ab)" marker-start="url(#ab)"/>
+
+  <!-- ============ Node 2 ============ -->
+  <rect x="24" y="460" width="560" height="316" rx="12" fill="#fff7ed" stroke="#ea580c" stroke-width="1.8"/>
+  <text x="40" y="488" class="h">Node 2 · System Controller</text>
+  <text x="40" y="506" class="xs">STM32F103C8T6 Blue Pill + ISO1042 module · supplies the 5 V harness</text>
+  <line x1="304" y1="424" x2="304" y2="458" stroke="#c2410c" stroke-width="2" marker-end="url(#ao)" marker-start="url(#ao)"/>
+
+  <rect x="40" y="520" width="252" height="120" rx="8" class="blk" stroke="#fdba74"/>
+  <text x="52" y="540" class="h2">Contactor state machine</text>
+  <text x="52" y="559" class="s">STANDBY → PRECHARGE → RUN</text>
+  <text x="52" y="575" class="s">precharge done on current decay</text>
+  <text x="52" y="591" class="s">trips on BMS fault / heartbeat loss,</text>
+  <text x="52" y="607" class="s">E-stop, E2E error, limit violation</text>
+  <text x="52" y="627" class="xs">fail-safe: every relay opens</text>
+
+  <rect x="40" y="652" width="252" height="110" rx="8" class="blk" stroke="#fdba74"/>
+  <text x="52" y="672" class="h2">Cooling fan</text>
+  <text x="52" y="691" class="s">TIM3 PWM 25 kHz, tach input</text>
+  <text x="52" y="707" class="s">curve 30 → 45 °C, 40 % while</text>
+  <text x="52" y="723" class="s">balancing, 100 % if BMS offline</text>
+  <text x="52" y="745" class="xs">inputs: key switch · E-stop loop (NC)</text>
+
+  <rect x="318" y="520" width="250" height="242" rx="8" class="blk" stroke="#fdba74"/>
+  <text x="330" y="540" class="h2">Power path (relay drivers)</text>
+  <rect x="332" y="552" width="222" height="30" rx="6" fill="#ffedd5" stroke="#fb923c"/>
+  <text x="344" y="572" class="s">① Main− contactor</text>
+  <rect x="332" y="590" width="222" height="30" rx="6" fill="#ffedd5" stroke="#fb923c"/>
+  <text x="344" y="610" class="s">② Precharge relay + resistor</text>
+  <rect x="332" y="628" width="222" height="30" rx="6" fill="#ffedd5" stroke="#fb923c"/>
+  <text x="344" y="648" class="s">③ Main+ contactor</text>
+  <rect x="332" y="666" width="222" height="30" rx="6" fill="#ffedd5" stroke="#fb923c"/>
+  <text x="344" y="686" class="s">④ Charge-enable relay</text>
+  <text x="332" y="718" class="xs">closing order ①→②→③, then ② opens</text>
+  <text x="332" y="734" class="xs">opening: ④, ③ at low current, ①</text>
+  <text x="332" y="750" class="xs">→ load / inverter DC-link · charger</text>
+  <line x1="294" y1="580" x2="328" y2="580" stroke="#c2410c" stroke-width="1.6" marker-end="url(#ao)"/>
+
+  <!-- ============ Node 3 ============ -->
+  <rect x="624" y="460" width="300" height="316" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="1.8"/>
+  <text x="640" y="488" class="h">Node 3 · IoT Gateway</text>
+  <text x="640" y="506" class="xs">ESP32 DevKit V1 (TWAI) + ISO1042 module</text>
+  <line x1="774" y1="424" x2="774" y2="458" stroke="#047857" stroke-width="2" marker-end="url(#ag)" marker-start="url(#ag)"/>
+  <rect x="640" y="520" width="268" height="242" rx="8" class="blk" stroke="#6ee7b7"/>
+  <text x="652" y="540" class="h2">CAN → JSON → MQTT</text>
+  <text x="652" y="560" class="s">CAN task decodes every frame</text>
+  <text x="652" y="578" class="s">1 Hz telemetry snapshot (≈ 1.3 kB)</text>
+  <text x="652" y="596" class="s">fault / state change events</text>
+  <text x="652" y="614" class="s">5 min store &amp; forward buffer</text>
+  <text x="652" y="632" class="s">NTP time stamps (UTC)</text>
+  <text x="652" y="650" class="s">token-checked remote commands:</text>
+  <text x="652" y="666" class="xs">clear faults · balancing · stop · fan</text>
+  <text x="652" y="688" class="s">optional TLS · OTA updates</text>
+  <text x="652" y="712" class="xs">LED: fast blink = no Wi-Fi,</text>
+  <text x="652" y="727" class="xs">slow blink = no broker, on = OK</text>
+
+  <!-- ============ Cloud (planned) ============ -->
+  <rect x="964" y="460" width="292" height="316" rx="12" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.8" stroke-dasharray="7 5"/>
+  <text x="980" y="488" class="h">Data &amp; Dashboard</text>
+  <text x="980" y="506" class="xs">weeks 12 – 13 (software engineering)</text>
+  <line x1="926" y1="600" x2="960" y2="600" stroke="#047857" stroke-width="2" marker-end="url(#ag)" marker-start="url(#ag)"/>
+  <text x="929" y="590" class="xs">Wi-Fi</text>
+
+  <rect x="980" y="522" width="260" height="56" rx="8" class="blk" stroke="#c4b5fd"/>
+  <text x="992" y="543" class="h2">MQTT broker</text>
+  <text x="992" y="562" class="xs">dbms/&lt;id&gt;/telemetry · event · status · cmd</text>
+  <line x1="1110" y1="580" x2="1110" y2="600" stroke="#6d28d9" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="980" y="602" width="260" height="56" rx="8" class="blk" stroke="#c4b5fd"/>
+  <text x="992" y="623" class="h2">Time-series database</text>
+  <text x="992" y="642" class="xs">cell / pack / temperature history</text>
+  <line x1="1110" y1="660" x2="1110" y2="680" stroke="#6d28d9" stroke-width="1.6" marker-end="url(#a)"/>
+  <rect x="980" y="682" width="260" height="76" rx="8" class="blk" stroke="#c4b5fd"/>
+  <text x="992" y="703" class="h2">Web dashboard</text>
+  <text x="992" y="722" class="xs">live cells, SoC, temps, faults,</text>
+  <text x="992" y="738" class="xs">contactor states, remote commands</text>
+
+  <!-- ============ legend ============ -->
+  <rect x="930" y="44" width="326" height="146" rx="10" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="946" y="68" class="h2">Message map (11-bit IDs)</text>
+  <text x="946" y="90" class="s">0x100–0x131  Node 1 → all</text>
+  <text x="946" y="108" class="xs">status · pack · limits · cells · temps · balance</text>
+  <text x="946" y="128" class="s">0x200–0x210  Node 2 → all</text>
+  <text x="946" y="146" class="xs">status (heartbeat) · commands to Node 1</text>
+  <text x="946" y="166" class="s">0x300–0x301  Node 3 → Node 2</text>
+  <text x="946" y="182" class="xs">heartbeat · remote commands</text>
+
+  <rect x="930" y="204" width="326" height="140" rx="10" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="946" y="228" class="h2">Safety chain</text>
+  <text x="946" y="248" class="xs">1. BQ76952 hardware thresholds (µs – ms)</text>
+  <text x="946" y="266" class="xs">2. Node 1 MCU checks, debounced, latched</text>
+  <text x="946" y="284" class="xs">3. Node 2 opens contactors on fault or</text>
+  <text x="946" y="300" class="xs">    500 ms loss of Node 1 heartbeat</text>
+  <text x="946" y="318" class="xs">4. Watchdogs on both STM32 nodes; E2E</text>
+  <text x="946" y="334" class="xs">    CRC-8 + alive counter on safety frames</text>
+</svg>
