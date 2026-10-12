@@ -1,128 +1,297 @@
-# Distributed 16S Battery Management System
+# Distributed Battery Management System
 
-## Project Overview
-This repository contains the firmware, network architecture, and cloud telemetry pipeline for a distributed 16S Battery Management System. Designed strictly around **Embedded Computer Networks and Software-Hardware Co-development**, this project solves complex battery management challenges using distributed computing nodes, isolated communication buses and software-controlled logic rather than pure analog circuitry.
+**An extendable, low-cost BMS for second-life EV battery packs.** Need more cells? Just add another
+Master Monitoring Unit to the same CAN bus. The current one keeps working and you don't need a bigger BMS.
 
-The system is designed to scale from standard 18650 cell packs up to pouch cells (Nissan Leaf modules) and prismatic cells, leveraging a Master-Satellite topology to separate sensing, actuation, and cloud telemetry.
+![STM32](https://img.shields.io/badge/MCU-STM32F103C8T6-03234B?logo=stmicroelectronics)
+![ESP32](https://img.shields.io/badge/Gateway-ESP32-E7352C?logo=espressif)
+![AFE](https://img.shields.io/badge/AFE-TI_BQ76952-CC0000)
+![CAN](https://img.shields.io/badge/Bus-Isolated_CAN_500k-2E7D32)
+![PCB](https://img.shields.io/badge/PCB-EasyEDA_4--layer-1E88E5)
+![MQTT](https://img.shields.io/badge/Cloud-MQTT_JSON-660066)
 
----
-
-## Core Functionalities
-
-1. **Distributed Data Acquisition:** The system reads 16 individual cell voltages, pack current and temperatures at the battery edge and transmits this data across a secure, priority-mapped network.
-2. **Software-Controlled Passive Balancing:** Cell voltage deltas are calculated by the Master BMU, which dynamically commands the analog front-end to trigger external MOSFETs and bleed resistors on a per-cell basis.
-3. **Fail-Safe Power Distribution:** An independent Auxiliary node physically controls main charge/discharge contactors and thermal management systems based on network commands, providing physical isolation from the measurement logic.
-4. **Edge-to-Cloud Telemetry Pipeline:** A dedicated IoT gateway sniffs local bus traffic, serializes the embedded data into JSON payloads, and pushes it to a cloud database via MQTT/Wi-Fi.
-5. **AI-Driven State of Health (SOH) Monitoring:** Cloud-hosted Python backend scripts apply a Scikit-Learn machine learning model (trained on NASA Battery Datasets) to historical telemetry to predict battery degradation, visualized on a live Grafana dashboard.
+<p align="center"><img src="images/system.jpg" width="720" alt="The complete system on the 16S pack"><br>
+<sub>The complete system on the 16S pack: Master Monitoring Unit with OLED (top), System Controller Unit (bottom) and WiFi Gateway (left).</sub></p>
 
 ---
 
-## System Requirements
+## 1. Project Overview
 
-### Functional Requirements
-* **FR1 - Cell Measurement:** Node 1 must measure up to 16 series cell voltages, aggregate pack current via a shunt, and read thermistor data using the TI BQ76952 AFE.
-* **FR2 - Balancing Actuation:** Node 1 must calculate cell voltage imbalances and transmit I2C commands to the AFE to toggle external passive balancing circuits.
-* **FR3 - Network Communication:** All nodes must communicate over a CAN 2.0B bus using standard 11-bit identifiers with predefined priority mapping.
-* **FR4 - Contactor Control:** Node 2 must parse incoming CAN messages to control standard charge/discharge relays and precharge sequences.
-* **FR5 - Telemetry Forwarding:** Node 3 must operate in CAN promiscuous mode to capture all bus traffic, format it into JSON, and transmit it to an external MQTT broker.
+Old electric-vehicle battery modules still have a lot of useful energy left, so they can get a second life
+in home or solar storage. But aged cells are not equal anymore, so every cell has to be watched closely.
 
-### Non-Functional Requirements
-* **NFR1 - Galvanic Isolation:** The CAN bus must utilize isolated CAN transceivers to protect the microcontrollers from the 60V battery ground.
-* **NFR2 - Microsecond Fault Response:** Node 1 must utilize hardware-level external interrupts tied to the AFE's ALERT pin to trigger immediate safety routines during short-circuit events.
-* **NFR3 - Network Safety:** Node 2 must implement a software watchdog/heartbeat monitor. If network communication from Node 1 is lost, Node 2 must default to a safe state (drop all contactors) to prevent thermal runaway.
-* **NFR4 - Scalability:** The network architecture must allow the addition of a second Master BMU (scaling to 32S) without requiring changes to the IoT Gateway or Aux Controller firmware.
+**The problem with normal BMSs.** Most low-cost BMSs are *centralized*: one board measures the cells,
+protects them, switches the contactors and handles communication. Two things go wrong with that:
 
----
+- **Fixed cell count.** A 16S BMS can only handle 16 cells. To go to 32S or 64S you have to throw the
+  old BMS away and buy a bigger, much more expensive one.
+- **Single point of failure.** If that one controller hangs, monitoring and protection are both lost at the same time.
 
-## System Architecture
+**What this project does differently.** The BMS is split into three kinds of units on one isolated CAN bus:
 
-The project is built on a 3-node distributed architecture communicating over an **Isolated CAN 2.0B bus**:
+- **Master Monitoring Unit:** one per 16 cells. It does the measuring, protection and balancing for its own part of the pack.
+- **System Controller Unit:** one per system. It switches the contactors.
+- **WiFi Gateway:** one per system. It sends all the data to the cloud.
 
-* **Node 1: Master BMU (Sensing & Balancing)**
-    * **Hardware:** STM32 + TI BQ76952 AFE.
-    * **Function:** Sits directly on the battery pack. Executes software-controlled balancing and triggers hardware interrupts for short-circuit protection.
-* **Node 2: Aux Controller (Power Distribution)**
-    * **Hardware:** STM32.
-    * **Function:** Listens to CAN traffic via Hardware Acceptance Filtering. Controls charge/discharge contactors and thermal management. 
-* **Node 3: IoT Gateway (Telemetry & Edge-to-Cloud)**
-    * **Hardware:** ESP32.
-    * **Function:** Sniffs bus traffic, serializes telemetry into JSON, and publishes to an MQTT broker over Wi-Fi.
+The System Controller Unit and the WiFi Gateway are **separate and shared by every Master Monitoring Unit**.
+To make the pack longer (16S → 32S → 48S → 64S), you **connect one more Master Monitoring Unit to the bus.**
+The existing hardware stays as it is.
 
----
-![Description of the first image](images/BQ.png)
-![Description of the first image](images/prototype.jpeg)
-![Description of the first image](images/Battery.jpeg)
-![Description of the first image](images/node1.png)
-## Weekly Development Timeline
+The pack built so far is **16S, made from 8 second-hand Nissan Leaf modules (2S2P each)**. A capacity test showed a
+**state of health (SOH) of about 35 %**, so the 66 Ah pack now gives about **23 Ah usable at 60 V nominal**.
 
-| Week | Phase | Tasks & Deliverables | Syllabus Mapping | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **Week 1** | **System Formulation** | Finalize the 16S distributed BMS architecture, define the three-node architecture, evaluate STM32/ESP32/BQ76952, and define the isolated CAN network topology. | 1. Project Formulation | ✅ Completed |
-| **Week 2** | **Requirements & Planning** | Define functional and non-functional requirements, communication requirements, fault-handling strategy, hardware/software interfaces, and development plan. Initialize project repository and documentation. | 2. Project Plans <br> 3. Requirement Engineering | ✅ Completed |
-| **Week 3** | **System Architecture & Firmware** | Define CAN message structure, node responsibilities and data flow. Develop the initial STM32 firmware architecture and BMS data-handling framework. | 4. High-level Simulation <br> 5. Architecture Extension | ✅ Completed |
-| **Week 4** | **Node 1 Firmware & BMS Interface** | Develop STM32–BQ76952 I²C communication, cell-monitoring firmware, temperature/current data acquisition, and external passive balancing control. | 5. Architecture Extension <br> 6. Prototype Development | 🔄 In Progress |
-| **Week 5** | **CAN Communication Prototype** | Develop and test CAN communication between STM32 and ESP32. Design and assemble custom ISO1042-based CAN transceiver modules with termination. Implement CAN data transmission and reception. | 6. Prototype Development | ✅ Completed |
-| **Week 6** | **IoT Gateway & Hardware Prototype** | Develop ESP32 CAN gateway firmware and basic Wi-Fi monitoring interface. Assemble the breadboard testing setup using STM32 Blue Pill, ESP32, BQ76952 SMD-to-DIP adapter, and custom CAN modules. Complete the Node 1 schematic. | 6. Prototype Development | ✅ Completed |
-| **Week 7** | **Battery Pack & Full Hardware Prototype** | Prepare the 16S Nissan Leaf battery pack and complete the full BMS testing circuit on dot board. Integrate cell-voltage, current and temperature sensing, balancing, and CAN communication with the battery pack. | 6. Prototype Development | 🔄 In Progress |
-| **Week 8** | **Node 1 PCB Development** | Complete PCB routing and design verification for Node 1. Review power, sensing, I²C, CAN isolation, balancing, and connector interfaces. Prepare PCB for fabrication. | 6. Prototype Development | 🔄 In Progress |
-| **Week 9** | **Backend & Data Infrastructure** | Develop the backend communication layer. Implement MQTT communication, telemetry processing, and database integration for cell-level and pack-level measurements. | 6. Prototype Development | ⏳ Planned |
-| **Week 10** | **Dashboard & Visualization** | Develop the user interface for real-time monitoring. Display individual cell voltages, pack voltage, current, temperatures, balancing status, SOC, and fault information. | 6. Prototype Development | ⏳ Planned |
-| **Week 11** | **Node 2 System Control** | Integrate and test the second STM32 node for precharge control, charge/discharge contactors, PWM cooling fan, and system-level fault response. Implement heartbeat/watchdog-based communication monitoring. | 6. Prototype Development | ⏳ Planned |
-| **Week 12** | **Custom PCB & System Integration** | Assemble and test the custom Node 1 PCB. Integrate Node 1, Node 2, and ESP32 gateway through the isolated CAN network. Finalize firmware and communication protocols. | 7. Integrated Testing | ⏳ Planned |
-| **Week 13** | **System Validation & Performance Testing** | Perform integrated testing with the battery pack. Evaluate cell-voltage measurement accuracy, temperature/current sensing, CAN communication, balancing, fault handling, contactor/precharge operation, and communication failure response. | 7. Integrated Testing <br> 8. Production Environment | ⏳ Planned |
-| **Week 14** | **Finalization & Demonstration** | Complete enclosure and physical integration, finalize dashboard, documentation, and test results. Conduct final system demonstration and prepare the project presentation and required artefacts. | 9. Artefacts <br> 10. Presentation | ⏳ Planned |
+<p align="center">
+<img src="images/pack_front.jpg" height="300" alt="Pack, front view">
+<img src="images/pack_side.jpg" height="300" alt="Pack, side view">
+</p>
+
+| Unit | Hardware | Job |
+| :-- | :-- | :-- |
+| **Master Monitoring Unit** | Custom 4-layer PCB: **STM32F103C8T6 + TI BQ76952** | Measures 16 cells, current and 4 temperatures; protection, SoC, balancing, OLED |
+| **System Controller Unit** | STM32F103C8T6 (Blue Pill) + ISO1042 module | Precharge, main contactors, charge enable, PWM cooling fan, fail-safe shutdown |
+| **WiFi Gateway** | ESP32 DevKit V1 + ISO1042 module | Listens to the whole bus, publishes JSON over MQTT, forwards remote commands |
+
+| Key figures | |
+| :-- | :-- |
+| Pack | 16S · ≈ 60 V nominal · 3.20–4.10 V per cell working window · ≈ 23 Ah usable |
+| Current sensing | 100 A / 75 mV shunt (0.75 mΩ) on the BQ76952 coulomb counter, 10 mA resolution |
+| Temperature | 4 × 10 kΩ NTC on the BQ76952 + BQ die temperature |
+| Balancing | Passive, 16 × 18 Ω 5 W external bleeders (≈ 0.2 A), NPN drivers on the PCB |
+| Bus | Isolated CAN 2.0A, 500 kbit/s, CRC-8 + alive counter on safety frames |
+| Update rate | 100 ms measurement and telemetry, 1 s MQTT snapshot |
 
 ---
 
-## 🛠️ Technology Stack
+## 2. Why Distributed?
 
-**Embedded Hardware:**
-* Microcontrollers: STM32, ESP32
-* Networking: CAN Transceivers
-* PCB Design: EasyEDA
+| | Centralized BMS | This distributed BMS |
+| :-- | :-- | :-- |
+| Going from 16S to 32S or 64S | Buy a new, bigger BMS | Add one Master Monitoring Unit per 16 cells |
+| Controller and gateway | Built into the one board | Shared by all units, added only once |
+| One controller hangs | Monitoring **and** protection lost | The other units notice and make the pack safe |
+| WiFi or cloud goes down | Often affects the whole board | Protection keeps running; data is buffered and sent later |
 
-**Embedded Software:**
-* Firmware: C/C++, STM32 HAL
-* Protocols: CAN 2.0B, I2C, UART, MQTT
+**How a bigger pack fits on the same bus**
+- **Works at any height in the stack:** each Master Monitoring Unit has its own isolated CAN transceiver and isolated
+  power supply, so it can sit at any voltage level of the stack.
+- **No message clashes:** each unit is planned to get its own block of CAN IDs, so up to four units (64S) can share one bus.
+  Even at that size the bus is far from full.
+- **No changes to the shared units:** the System Controller Unit and the WiFi Gateway tell the units apart by their IDs, so
+  they don't need new hardware.
 
-**Cloud & AI Backend:**
-* Broker: Eclipse Mosquitto (MQTT)
-* Database: InfluxDB
-* Dashboard: Grafana
-* ML Pipeline: Python
+**How no single failure leaves the pack unprotected**
+- **A Master Monitoring Unit goes silent:** this could be a broken wire or frozen firmware. The System Controller Unit misses
+  its heartbeat and opens all contactors within **500 ms**, and the watchdog restarts the frozen unit.
+- **The System Controller Unit loses power:** the contactors drop open by themselves. The Master Monitoring Units keep
+  measuring and showing the data.
+- **The WiFi Gateway or the internet fails:** protection is not affected at all. The gateway keeps 5 minutes of data and
+  sends it once it reconnects.
+- **A message gets corrupted on the bus:** the CRC-8 check rejects it, and frozen data is caught by the alive counter.
+
+> **Current status:** the hardware built so far is one 16S Master Monitoring Unit. The firmware in this repository runs
+> that single unit.
+
+---
+
+## 3. Core Functionalities
+
+**Sensing and protection (Master Monitoring Unit)**
+- Reads all 16 cell voltages, the stack voltage and the pack current **every 100 ms**, plus 4 NTCs and the BQ76952 chip temperature.
+- **Two protection layers:**
+  - the BQ76952's own hardware limits (over/under voltage, over-current, short circuit, over/under temperature);
+  - software checks on the STM32.
+- Detects **sensor faults**, not only battery faults: a broken cell-sense wire, an open or shorted NTC, or a lost link to the BQ76952.
+- **Faults stay latched** until someone clears them **and** the problem is really gone. A clear command can never override a live danger.
+- **Tells the rest of the system how much current is allowed** for charging and discharging. The limit is lowered near
+  full / empty and when the cells get hot (45 → 55 °C).
+
+**State of charge**
+- Starts from the resting cell voltage and then counts every coulomb with the BQ76952's hardware counter.
+- Corrects itself again after 30 minutes of rest.
+- Reports SoC, SoH, remaining Ah and usable capacity.
+
+**Balancing**
+- **Passive balancing** through external 18 Ω / 5 W resistors driven by transistors on the PCB.
+- Neighbouring cells take turns (odd / even every 30 s).
+- A cell bleeds only when it is more than 25 mV above the lowest cell, the pack is above 3.85 V per cell, cooler than
+  45 °C and not discharging.
+
+**Power control (System Controller Unit)**
+- **Safe start (precharge):** a small precharge relay first charges the load capacitors slowly. The main contactor closes
+  only after the current has dropped below 1 A. This avoids a big spark and welded contacts.
+- **Opens every contactor at once** on any fault, a missing heartbeat, corrupted data, the E-stop or too much current.
+- **Never restarts by itself:** after a fault or a remote stop, the key must be turned OFF and ON again.
+- **Cooling fan** speed follows the hottest cell (30 → 45 °C). It runs at 40 % while balancing and at 100 % if temperature data is lost.
+
+**Cloud link (WiFi Gateway)**
+- Listens to every message on the bus and sends **one JSON snapshot per second** over MQTT, with real time stamps.
+- **Store & forward:** keeps 5 minutes of data when WiFi is down and sends it later.
+- Sends fault and state-change events, and accepts **remote commands checked with a token**: clear faults, balancing
+  on/off, stop, fan speed.
+- The remote side can **stop** the pack but can never close a contactor.
+
+**Web dashboard**
+- Live pack data in the browser **once every second**: voltage, current, SoC, all 16 cells, temperatures, contactors,
+  fan and balancing.
+- **History charts** from 1 hour to 30 days, with CSV export.
+- **Automatic alarms** from the fault bits.
+- **Remote commands** with a full log.
+- **Admin and viewer accounts.**
+- Works on phones too.
+
+**Local display:** a 0.96" OLED on the Master Monitoring Unit shows a summary, the cell voltages (bleeding cells
+highlighted), temperatures and faults. Both STM32 units also have a serial command line for testing.
+
+---
+
+## 4. System Requirements
+
+**Functional**
+
+| ID | Requirement |
+| :-- | :-- |
+| FR1 | Measure 16 cell voltages (1 mV), stack voltage, pack current (±266 A range) and 4 cell temperatures every 100 ms per Master Monitoring Unit |
+| FR2 | Detect and latch cell OV/UV, over/under temperature, charge/discharge over-current, short circuit, imbalance and sensor faults |
+| FR3 | Estimate SoC and report SoH, remaining capacity and allowed charge / discharge current |
+| FR4 | Balance cells passively through external bleeders, never two neighbouring cells at once |
+| FR5 | Show live pack data and faults on the Master Monitoring Unit OLED |
+| FR6 | Exchange all data over isolated CAN with one message map shared by every unit |
+| FR7 | The System Controller Unit controls precharge, main contactors, charge enable and the cooling fan, and opens all relays on any fault |
+| FR8 | The WiFi Gateway publishes time-stamped telemetry to MQTT every second and forwards authorised remote commands |
+| FR9 | The web dashboard shows live data, history, alarms and remote commands, with separate admin and viewer roles |
+| FR10 | More Master Monitoring Units can be added to extend the pack in steps of 16 cells, sharing one System Controller Unit and one WiFi Gateway |
+
+**Non-functional**
+
+| ID | Requirement | How it is met |
+| :-- | :-- | :-- |
+| NFR1 | Fail-safe | Relays open at reset and on any fault; the System Controller Unit trips 500 ms after the last heartbeat; watchdog on both STM32 units |
+| NFR2 | Galvanic isolation | Pack side and system side separated by ISO1042 (5 kVrms) and a B0505S isolated DC-DC |
+| NFR3 | Data integrity | CRC-8 (SAE J1850) + alive counter on status / pack / limits / commands; frozen or corrupt data is rejected |
+| NFR4 | Timing | 100 ms control cycle, status frame sent immediately on any change, 2.7 % bus load for one unit |
+| NFR5 | Availability | Gateway buffers ≥ 5 min of data offline and reconnects on its own |
+| NFR6 | Security | Credentials kept out of git, command token, optional TLS, dashboard login with roles; the remote side can **stop** the pack but can never close a contactor |
+| NFR7 | Scalability | No single point of failure; adding a unit needs no new hardware in the System Controller Unit or the WiFi Gateway |
+| NFR8 | Resources | Fits an STM32F103C8 (64 KB / 20 KB): Master Monitoring Unit uses 31 KB / 6.7 KB, System Controller Unit 17 KB / 4.9 KB |
+
+---
+
+## 5. System Architecture
+
+![System architecture](images/architecture.png)
+
+- **Isolated on every unit:** each Master Monitoring Unit sits at its own place in the stack and talks to the rest of the
+  system only through isolated CAN and an isolated power supply. The pack side and the low-voltage side never share a ground.
+- **Shared units:** the System Controller Unit and the WiFi Gateway sit on the same bus and serve every unit.
+- **Four safety layers:**
+  1. BQ76952 hardware limits;
+  2. software checks on the Master Monitoring Unit;
+  3. the System Controller Unit opens the contactors;
+  4. watchdogs and CRC checks catch frozen units or bad data.
+
+### How the System Controller Unit switches the pack
 
 ```mermaid
-flowchart TD
-    subgraph Battery Level
-        Pack[16S Battery Pack & Thermistors]
-    end
+stateDiagram-v2
+    direction LR
+    [*] --> INIT
+    INIT --> STANDBY: monitoring unit found
+    STANDBY --> PRECHARGE: key ON
+    PRECHARGE --> RUN: capacitors charged
+    RUN --> STOPPING: key OFF / remote stop
+    STOPPING --> STANDBY: current low
+    STANDBY --> FAULT: fault
+    PRECHARGE --> FAULT: fault / too slow
+    RUN --> FAULT: fault
+    FAULT --> STANDBY: cleared + key OFF
+```
 
-    subgraph Distributed BMS Nodes
-        Node1[Node 1: Master BMU<br>STM32 + BQ76952 AFE]
-        Node2[Node 2: Aux Controller<br>STM32]
-        Node3[Node 3: IoT Gateway<br>ESP32]
-        CAN{Isolated CAN 2.0B Bus}
-    end
+| State | What happens |
+| :-- | :-- |
+| STANDBY | All contactors open, waiting for the key |
+| PRECHARGE | Load capacitors charge slowly through a resistor |
+| RUN | Main contactors closed, pack is in use |
+| STOPPING | Waits for the current to fall, then opens the contactors |
+| FAULT | Everything open; needs the fault cleared and the key turned OFF → ON |
 
-    subgraph Power & Actuation
-        Relays[Charge/Discharge Contactors<br>& Thermal Management]
-    end
+---
 
-    subgraph Cloud & AI Backend
-        MQTT[MQTT Broker]
-        DB[(InfluxDB)]
-        ML[Python AI SOH Model]
-        Dash[Grafana Dashboard]
-    end
+## 6. Hardware: Master Monitoring Unit
 
-    Pack <-->|Analog| Node1
-    Node1 <-->|Telemetry & Commands| CAN
-    CAN <--> Node2
-    CAN <--> Node3
-    
-    Node2 -->|Physical Control| Relays
-    Node3 -->|Wi-Fi / JSON| MQTT
-    
-    MQTT --> DB
-    DB <--> ML
-    DB --> Dash
+Designed in **EasyEDA**: 4 layers, **92.3 × 71.5 mm**, 162 parts. The bare boards were **fabricated by JLCPCB**
+(Gerbers, BOM and pick-and-place in [`PCB/`](PCB/)).
+
+<p align="center"><img src="images/pcb_3D.jpg" width="720" alt="PCB 3D view"><br>
+<sub>3D view: cell and shunt connectors on the left, bleeder headers at the bottom, isolated CAN connector at the top right.</sub></p>
+
+<p align="center"><img src="images/Schematic-Master_Monitoring_Unit.png" width="720" alt="Master Monitoring Unit schematic"><br>
+<sub>Schematic: cell input filters and bleeder drivers, BQ76952, STM32, isolated CAN (ISO1042 + B0505S), LDO, OLED, NTC, SWD and USART headers.</sub></p>
+
+| Top | Inner 1 |
+| :-: | :-: |
+| <img src="images/pcb_top.jpg" width="360"> | <img src="images/pcb_inner1.jpg" width="360"> |
+| Parts and most of the routing | Ground plane + short routes |
+| **Inner 2** | **Bottom** |
+| <img src="images/pcb_inner2.jpg" width="360"> | <img src="images/pcb_bottom.jpg" width="360"> |
+| Ground plane + short routes | GND / isolated GND pour + routes |
+
+<p align="center"><img src="images/MMU.jpg" width="560" alt="Assembled Master Monitoring Unit"><br>
+<sub>The assembled board.</sub></p>
+
+**Design points**
+- **Cell inputs:** all 17 cell-sense lines are filtered (100 Ω / 220 nF). Each cell has its own transistor driver for the external bleeder resistor.
+- **Current sense:** the shunt input has a differential filter for clean readings.
+- **Safe BQ76952 reset:** the reset pin is controlled by the MCU with a short pulse, so the chip can never be shut down by accident.
+- **CAN and power connector:** split 120 Ω CAN termination and ESD protection. One 4-pin connector carries 5 V, CAN_H, CAN_L and GND.
+
+<table>
+<tr>
+<td align="center" width="50%"><img src="images/SCU.jpg" alt="System Controller Unit"><br><sub>System Controller Unit</sub></td>
+<td align="center" width="50%"><img src="images/Gateway.jpg" alt="WiFi Gateway"><br><sub>WiFi Gateway</sub></td>
+</tr>
+</table>
+
+---
+
+## 7. Dashboard
+
+![Dashboard overview](images/dashboard.png)
+
+The dashboard runs on any computer with Docker and opens in the browser, including on a phone on the same WiFi.
+- **Overview:** the pack at a glance. You see SoC, voltage, current and power, the charge and discharge limits, a live
+  drawing of the contactors, the temperatures, how far each cell is from the average, and the health of every unit.
+- **Cells:** all 16 cell voltages in detail, with the balancing cells shown.
+- **History:** charts over any time range, with CSV export.
+- **Alarms:** every fault with when it started and ended. An admin can acknowledge it.
+- **Control:** clear faults, balancing on/off, fan speed and stop. Each command is logged until the pack confirms it.
+- **Settings:** pack details and user accounts.
+
+**Every value shows where it came from:** *Live* (measured from the pack), *Simulated* or *Offline*.
+A demo simulator can run as a separate pack, so you can show the dashboard without the battery, and simulated data
+is never mixed with the real pack's data.
+
+Details and setup: [`Software/README.md`](Software/README.md).
+
+---
+
+## 8. Technology Stack
+
+| Area | Used in this project |
+| :-- | :-- |
+| Microcontrollers | STM32F103C8T6 (Cortex-M3, 72 MHz) × 2 · ESP32-WROOM-32 (DevKit V1) |
+| Battery front end | TI BQ76952 (16S AFE, coulomb counter, HW protection, balance switches) |
+| Isolation and bus | TI ISO1042 isolated CAN FD transceiver (custom modules + on-board) · Mornsun B0505S · NUP2105 ESD |
+| Other parts | AMS1117-3.3 · MJD44H11 pre-regulator · MMBT2222A + B5819W bleeder drivers · 0.96" SSD1306 OLED |
+| PCB | **EasyEDA** (schematic + 4-layer layout) · JLCPCB fabrication |
+| STM32 firmware | C11 · STM32 HAL (Cube FW_F1 1.8.7) · STM32CubeMX 6.18 · CMake + Ninja · arm-none-eabi-gcc |
+| ESP32 firmware | C++17 · Arduino-ESP32 2.0 (ESP-IDF TWAI driver, FreeRTOS) · PlatformIO · PubSubClient · ArduinoJson 7 |
+| Protocols | CAN 2.0A · I²C · SPI · UART · MQTT 3.1.1 · JSON · NTP · TLS (optional) |
+| Tools | VS Code + STM32Cube extension · Cortex-Debug / OpenOCD · ST-Link V2 · host tests with clang/gcc |
+| Data and dashboard | Eclipse Mosquitto · Spring Boot (Java 21) · PostgreSQL · React + TypeScript · Docker Compose |
+
+---
+
+> ⚠️ **Safety:** this pack stores more than a kWh at 60 V. Test new firmware with the contactors disconnected or on a
+> current-limited supply first, keep an E-stop in the loop, and never bypass the BQ76952 hardware protections.
+
+**Author:** Binara Herath · 2026
