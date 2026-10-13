@@ -230,10 +230,8 @@ Designed in **EasyEDA**: 4 layers, **92.3 × 71.5 mm**, 162 parts. The bare boar
 | Top | Inner 1 |
 | :-: | :-: |
 | <img src="images/pcb_top.jpg" width="360"> | <img src="images/pcb_inner1.jpg" width="360"> |
-| Parts and most of the routing | Ground plane + short routes |
 | **Inner 2** | **Bottom** |
 | <img src="images/pcb_inner2.jpg" width="360"> | <img src="images/pcb_bottom.jpg" width="360"> |
-| Ground plane + short routes | GND / isolated GND pour + routes |
 
 <p align="center"><img src="images/MMU.jpg" width="560" alt="Assembled Master Monitoring Unit"><br>
 <sub>The assembled board.</sub></p>
