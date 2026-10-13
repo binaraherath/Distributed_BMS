@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: dbms-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/dbms}
+    username: ${DB_USER:dbms}
+    password: ${DB_PASSWORD:dbms}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate        # schema is owned by Flyway, not Hibernate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  jackson:
+    time-zone: UTC
+
+server:
+  port: ${SERVER_PORT:8081}
+  shutdown: graceful
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+springdoc:
+  api-docs:
+    path: /api/docs/openapi.json
+  swagger-ui:
+    path: /api/docs
+    operations-sorter: alpha
+    tags-sorter: alpha
+
+bms:
+  mqtt:
+    enabled: ${MQTT_ENABLED:true}
+    url: ${MQTT_URL:tcp://localhost:1883}
+    username: ${MQTT_USERNAME:backend}
+    password: ${MQTT_PASSWORD:backend}
+    client-id: ${MQTT_CLIENT_ID:dbms-backend}
+    topic-root: ${MQTT_TOPIC_ROOT:dbms}
+    # Token the gateway firmware expects inside every command (GW_CMD_TOKEN)
+    command-token: ${GATEWAY_COMMAND_TOKEN:change-me}
+  storage:
+    sample-interval: ${STORAGE_SAMPLE_INTERVAL:10s}
+    retention-days: ${STORAGE_RETENTION_DAYS:90}
+  live:
+    node-stale-after: 3s
+    gateway-stale-after: 5s
+  commands:
+    ack-timeout: 10s
+  security:
+    jwt-secret: ${JWT_SECRET:dev-only-secret-change-me-dev-only-secret-change-me}
+    token-ttl: ${TOKEN_TTL:8h}
+    cookie-name: DBMS_SESSION
+    cookie-secure: ${COOKIE_SECURE:false}
+    seed:
+      admin-username: ${BMS_ADMIN_USERNAME:admin}
+      admin-password: ${BMS_ADMIN_PASSWORD:admin12345}
+      viewer-username: ${BMS_VIEWER_USERNAME:viewer}
+      viewer-password: ${BMS_VIEWER_PASSWORD:viewer12345}
+
+logging:
+  level:
+    io.github.binaraherath.dbms: INFO
+    org.eclipse.paho: WARN

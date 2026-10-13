@@ -1,0 +1,13 @@
+# Least privilege: the backend reads everything and may only write commands;
+# gateways publish data and may only read commands.
+
+user backend
+topic read dbms/#
+topic write dbms/+/cmd
+
+user gateway
+topic write dbms/+/telemetry
+topic write dbms/+/status
+topic write dbms/+/event
+topic write dbms/+/cmd/ack
+topic read dbms/+/cmd

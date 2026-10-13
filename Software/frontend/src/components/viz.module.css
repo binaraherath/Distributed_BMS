@@ -1,0 +1,452 @@
+/* ================= SoC gauge ================= */
+.gauge {
+  position: relative;
+  width: 100%;
+  max-width: 236px;
+  aspect-ratio: 1;
+  margin: 0 auto -24px;
+}
+
+.gaugeSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.gaugeTrack {
+  fill: none;
+  stroke: var(--accent-wash);
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.gaugeFill {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: d 600ms var(--ease);
+}
+
+.gaugeTick {
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.gaugeCenter {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.gaugeValue {
+  font-size: var(--fs-hero);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.gaugeUnit {
+  font-size: var(--fs-20);
+  font-weight: 500;
+  color: var(--muted);
+  margin-left: 2px;
+  letter-spacing: 0;
+}
+
+.gaugeLabel {
+  font-size: var(--fs-12);
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.gaugeSub {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+
+/* ================= contactors ================= */
+.contactors {
+  margin: 0;
+  height: 100%;
+  display: grid;
+  align-content: center;
+  gap: var(--sp-5);
+}
+
+.contactorSvg {
+  width: 100%;
+  height: auto;
+  max-height: 210px;
+  overflow: visible;
+}
+
+.rail,
+.railOn {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rail {
+  stroke: var(--border-strong);
+}
+
+.railOn {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.sw circle,
+.swOn circle {
+  fill: var(--surface);
+  stroke-width: 1.6;
+}
+
+.sw circle {
+  stroke: var(--muted);
+}
+
+.swOn circle {
+  stroke: var(--accent);
+}
+
+.sw path,
+.swOn path {
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.sw path {
+  stroke: var(--muted);
+}
+
+.swOn path {
+  stroke: var(--accent);
+}
+
+.hvBox rect {
+  fill: var(--surface-2);
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.hvText {
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  fill: var(--text-2);
+}
+
+.hvSub,
+.hvLabel {
+  font-size: 8.5px;
+  fill: var(--muted);
+}
+
+.contactorLegend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.chip,
+.chipOn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-12);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  background: var(--surface);
+}
+
+.chipOn {
+  border-color: transparent;
+  background: var(--accent-wash);
+}
+
+.chipDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted);
+}
+
+.chipOn .chipDot {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.chipState {
+  color: var(--muted);
+}
+
+/* ================= cell chart ================= */
+.cellChart {
+  position: relative;
+  width: 100%;
+}
+
+.cellChart svg {
+  display: block;
+  overflow: visible;
+}
+
+.grid {
+  stroke: var(--grid);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.axisZero {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.tick {
+  font-size: 11px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.axisTitle {
+  font-size: 10px;
+  fill: var(--faint);
+  letter-spacing: 0.04em;
+}
+
+.bar {
+  fill: var(--accent);
+  transition: opacity 120ms var(--ease);
+}
+
+.balDot {
+  fill: var(--surface);
+  stroke: var(--text-2);
+  stroke-width: 1.5;
+}
+
+.barLabel {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================= tooltip (shared with trend charts) ================= */
+.tooltip {
+  position: absolute;
+  z-index: 5;
+  width: 150px;
+  pointer-events: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+  padding: 8px 10px;
+  display: grid;
+  gap: 2px;
+}
+
+.ttValue {
+  font-weight: 650;
+  font-size: var(--fs-14);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ttRow {
+  font-size: var(--fs-12);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ttKey {
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  flex: none;
+}
+
+/* ================= node topology ================= */
+.topology {
+  position: relative;
+  padding-top: var(--sp-6);
+}
+
+.bus,
+.link {
+  position: absolute;
+  top: 10px;
+  height: 0;
+  border-top: 1px solid var(--border-strong);
+}
+
+/* CAN joins the three nodes; the gateway reaches the server over Wi-Fi */
+.bus {
+  left: 12.5%;
+  right: 37.5%;
+}
+
+.link {
+  left: 62.5%;
+  right: 12.5%;
+  border-top-style: dashed;
+}
+
+.busLabel {
+  position: absolute;
+  top: -19px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.nodes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+
+.node {
+  position: relative;
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+/* drop line from the bus to each node */
+.node::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: calc(-1 * var(--sp-6) + 10px);
+  height: calc(var(--sp-6) - 10px);
+  width: 1px;
+  background: var(--border-strong);
+}
+
+.node[data-source="SIMULATED"] {
+  background:
+    repeating-linear-gradient(135deg, var(--sim-wash) 0 5px, transparent 5px 11px),
+    var(--surface-2);
+  border-color: color-mix(in srgb, var(--sim) 35%, var(--border));
+}
+
+.node[data-source="OFFLINE"] {
+  opacity: 0.72;
+}
+
+.nodeHead {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.nodeIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  flex: none;
+}
+
+.nodeName {
+  font-weight: 600;
+  font-size: var(--fs-14);
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.nodeRole {
+  font-size: var(--fs-12);
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.nodeFacts {
+  margin: 0;
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  font-size: var(--fs-12);
+}
+
+.nodeFacts div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.nodeFacts dt {
+  color: var(--muted);
+}
+
+.nodeFacts dd {
+  margin: 0;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1100px) {
+  .nodes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .topology {
+    padding-top: 0;
+  }
+
+  .bus,
+  .link,
+  .node::before {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .nodes {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ================= trend chart ================= */
+.trend {
+  position: relative;
+  width: 100%;
+}

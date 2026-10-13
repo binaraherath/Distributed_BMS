@@ -1,0 +1,11 @@
+# Integration tests: real PostgreSQL (Testcontainers), no MQTT broker.
+bms:
+  mqtt:
+    enabled: false
+spring:
+  main:
+    banner-mode: off
+logging:
+  level:
+    org.testcontainers: warn
+    tc: warn

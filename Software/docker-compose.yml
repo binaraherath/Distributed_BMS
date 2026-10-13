@@ -1,0 +1,84 @@
+# Whole software stack on one machine:
+#   docker compose up -d --build            dashboard on http://localhost:8080
+#   docker compose --profile sim up -d      ... plus the gateway simulator
+name: dbms
+
+x-gateway-token: &mqtt-token
+  GATEWAY_COMMAND_TOKEN: ${GATEWAY_COMMAND_TOKEN:-change-me}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: dbms
+      POSTGRES_USER: ${DB_USER:-dbms}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-dbms}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"   # local development only, not on the LAN
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d dbms"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  mosquitto:
+    build: ./mosquitto
+    environment:
+      MQTT_BACKEND_PASSWORD: ${MQTT_BACKEND_PASSWORD:-backend}
+      MQTT_GATEWAY_PASSWORD: ${MQTT_GATEWAY_PASSWORD:-gateway}
+    ports:
+      - "1883:1883"             # the ESP32 gateway connects here over Wi-Fi
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+    environment:
+      <<: *mqtt-token
+      DB_URL: jdbc:postgresql://postgres:5432/dbms
+      DB_USER: ${DB_USER:-dbms}
+      DB_PASSWORD: ${DB_PASSWORD:-dbms}
+      MQTT_URL: tcp://mosquitto:1883
+      MQTT_USERNAME: backend
+      MQTT_PASSWORD: ${MQTT_BACKEND_PASSWORD:-backend}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-dev-only-secret-change-me}
+      BMS_ADMIN_USERNAME: ${BMS_ADMIN_USERNAME:-admin}
+      BMS_ADMIN_PASSWORD: ${BMS_ADMIN_PASSWORD:-admin12345}
+      BMS_VIEWER_USERNAME: ${BMS_VIEWER_USERNAME:-viewer}
+      BMS_VIEWER_PASSWORD: ${BMS_VIEWER_PASSWORD:-viewer12345}
+      TZ: Asia/Colombo
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"               # dashboard, also reachable from phones on the same network
+    restart: unless-stopped
+
+  simulator:
+    build: ./tools/gateway-simulator
+    profiles: ["sim"]
+    depends_on:
+      - mosquitto
+    environment:
+      <<: *mqtt-token
+      MQTT_HOST: mosquitto
+      MQTT_USERNAME: gateway
+      MQTT_PASSWORD: ${MQTT_GATEWAY_PASSWORD:-gateway}
+      DEVICE_ID: ${SIM_DEVICE_ID:-sim-01}
+      SIM_PROFILE: ${SIM_PROFILE:-cycle}
+      SIM_UNTAGGED: ${SIM_UNTAGGED:-0}         # 1 = no "simulated" tag (shown as Live)
+      SIM_NTC_OFFSETS: ${SIM_NTC_OFFSETS:-}    # per-NTC reading error, e.g. -0.1,-7.8,-3.2,-17.1
+    restart: unless-stopped
+
+volumes:
+  pgdata:

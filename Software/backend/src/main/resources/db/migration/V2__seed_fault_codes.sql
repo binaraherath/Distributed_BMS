@@ -1,0 +1,23 @@
+-- Fault bits as defined in Firmware/common/bms_can_protocol.h (BMS_FLT_*, CTRL_FLT_*).
+INSERT INTO fault_code (source, bit, code, severity, description) VALUES
+    ('BMS',  0, 'BQ_COMM',           'CRITICAL', 'I2C link to the BQ76952 lost'),
+    ('BMS',  1, 'BQ_CONFIG',         'CRITICAL', 'BQ76952 configuration could not be verified'),
+    ('BMS',  2, 'CELL_OV',           'CRITICAL', 'Cell over-voltage'),
+    ('BMS',  3, 'CELL_UV',           'CRITICAL', 'Cell under-voltage'),
+    ('BMS',  4, 'OVER_TEMP',         'CRITICAL', 'Cell or AFE over-temperature'),
+    ('BMS',  5, 'UNDER_TEMP',        'CRITICAL', 'Cell under-temperature'),
+    ('BMS',  6, 'OC_CHARGE',         'CRITICAL', 'Over-current while charging'),
+    ('BMS',  7, 'OC_DISCHARGE',      'CRITICAL', 'Over-current while discharging'),
+    ('BMS',  8, 'SHORT_CIRCUIT',     'CRITICAL', 'Short circuit detected by the BQ76952'),
+    ('BMS',  9, 'IMBALANCE',         'WARNING',  'Cell voltage spread above the hard limit'),
+    ('BMS', 10, 'CELL_SENSE',        'CRITICAL', 'Implausible cell reading or open sense wire'),
+    ('BMS', 11, 'NTC_SENSE',         'WARNING',  'NTC thermistor open or shorted'),
+    ('BMS', 12, 'STACK_MISMATCH',    'WARNING',  'Sum of cells does not match the stack voltage'),
+    ('BMS', 13, 'BQ_PERMANENT_FAIL', 'CRITICAL', 'BQ76952 reported a permanent failure'),
+    ('CTRL', 0, 'BMS_TIMEOUT',       'CRITICAL', 'Controller lost the master node heartbeat'),
+    ('CTRL', 1, 'BMS_FAULT',         'CRITICAL', 'Controller tripped on a master node fault'),
+    ('CTRL', 2, 'BMS_DATA',          'CRITICAL', 'Corrupt or stale data from a master node'),
+    ('CTRL', 3, 'PRECHARGE',         'CRITICAL', 'Precharge timed out or saw an inrush'),
+    ('CTRL', 4, 'ESTOP',             'CRITICAL', 'Emergency-stop loop open'),
+    ('CTRL', 5, 'LIMIT_VIOLATION',   'WARNING',  'Pack current exceeded the BMS limit'),
+    ('CTRL', 6, 'CAN_BUSOFF',        'CRITICAL', 'Controller CAN interface is bus-off');

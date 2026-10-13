@@ -1,0 +1,146 @@
+/*
+ * Graphite & Copper - design tokens.
+ * Light is the base; dark is selected (not inverted) under the system setting or
+ * data-theme="dark". Status colours always travel with an icon and a label.
+ */
+:root {
+  color-scheme: light;
+
+  --bg: #f4f1ea;
+  --surface: #fbfaf6;
+  --surface-2: #f1eee7;
+  --surface-3: #e9e5dc;
+  --border: #e2ddd2;
+  --border-strong: #d2ccbf;
+  --grid: #ebe7de;
+
+  --text: #1b1d20;
+  --text-2: #3f4145;
+  --muted: #6b675f;
+  --faint: #8f8a80;
+
+  --accent: #9c5a2e;
+  --accent-hover: #87491f;
+  --accent-wash: rgb(156 90 46 / 0.1);
+  --accent-ink: #fbfaf6;
+  --focus: #9c5a2e;
+
+  --good: #4f7a5b;
+  --good-wash: rgb(79 122 91 / 0.12);
+  --warn: #946d12;
+  --warn-wash: rgb(148 109 18 / 0.12);
+  --crit: #a3442f;
+  --crit-wash: rgb(163 68 47 / 0.1);
+  --sim: #6a6f86;
+  --sim-wash: rgb(106 111 134 / 0.12);
+
+  --shadow-panel: 0 1px 0 rgb(27 29 32 / 0.03), 0 1px 2px rgb(27 29 32 / 0.04);
+  --shadow-pop: 0 12px 32px rgb(27 29 32 / 0.14), 0 2px 6px rgb(27 29 32 / 0.08);
+  --scrim: rgb(27 29 32 / 0.36);
+
+  --font-sans: "Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --fs-11: 0.6875rem;
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-20: 1.25rem;
+  --fs-24: 1.5rem;
+  --fs-32: 2rem;
+  --fs-hero: 3.5rem;
+
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+
+  --sidebar-w: 236px;
+  --topbar-h: 60px;
+  --tabbar-h: 64px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #111316;
+    --surface: #181b1f;
+    --surface-2: #1f2328;
+    --surface-3: #262b31;
+    --border: #2a2f35;
+    --border-strong: #363c43;
+    --grid: #23272c;
+
+    --text: #ece8e1;
+    --text-2: #c9c4bb;
+    --muted: #9a968e;
+    --faint: #6f6c66;
+
+    --accent: #b8744a;
+    --accent-hover: #c98a60;
+    --accent-wash: rgb(184 116 74 / 0.14);
+    --accent-ink: #111316;
+    --focus: #c98a60;
+
+    --good: #8aa690;
+    --good-wash: rgb(138 166 144 / 0.14);
+    --warn: #c9a24a;
+    --warn-wash: rgb(201 162 74 / 0.14);
+    --crit: #c8695a;
+    --crit-wash: rgb(200 105 90 / 0.14);
+    --sim: #9aa0b8;
+    --sim-wash: rgb(154 160 184 / 0.14);
+
+    --shadow-panel: none;
+    --shadow-pop: 0 16px 40px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.3);
+    --scrim: rgb(0 0 0 / 0.55);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #111316;
+  --surface: #181b1f;
+  --surface-2: #1f2328;
+  --surface-3: #262b31;
+  --border: #2a2f35;
+  --border-strong: #363c43;
+  --grid: #23272c;
+
+  --text: #ece8e1;
+  --text-2: #c9c4bb;
+  --muted: #9a968e;
+  --faint: #6f6c66;
+
+  --accent: #b8744a;
+  --accent-hover: #c98a60;
+  --accent-wash: rgb(184 116 74 / 0.14);
+  --accent-ink: #111316;
+  --focus: #c98a60;
+
+  --good: #8aa690;
+  --good-wash: rgb(138 166 144 / 0.14);
+  --warn: #c9a24a;
+  --warn-wash: rgb(201 162 74 / 0.14);
+  --crit: #c8695a;
+  --crit-wash: rgb(200 105 90 / 0.14);
+  --sim: #9aa0b8;
+  --sim-wash: rgb(154 160 184 / 0.14);
+
+  --shadow-panel: none;
+  --shadow-pop: 0 16px 40px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.3);
+  --scrim: rgb(0 0 0 / 0.55);
+}
