@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Node1_Monitoring_Unit (ST-Link, OpenOCD)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/Debug/Node1_Monitoring_Unit.elf",
+            "runToEntryPoint": "main",
+            "configFiles": ["openocd_stm32f1.cfg"]
+        }
+    ]
+}

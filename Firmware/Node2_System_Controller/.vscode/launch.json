@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Node2_System_Controller (ST-Link, OpenOCD)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/Debug/Node2_System_Controller.elf",
+            "runToEntryPoint": "main",
+            "configFiles": ["openocd_stm32f1.cfg"]
+        }
+    ]
+}
